@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es-MX" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrecioMolido.mx — Referencia de Plástico Molido en México</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo" onclick="irAlDashboard()">
+                <span class="logo-icon">♻️</span>
+                <div class="logo-text">
+                    <span>Precio<span class="logo-bold">Molido</span></span>
+                    <span class="logo-tld">.mx</span>
+                </div>
+            </a>
+
+            <div class="nav-overlay" id="navOverlay"></div>
+
+            <nav class="nav" id="mainNav">
+                <a href="#dashboard" class="nav-link active" data-panel="dashboard">
+                    <span class="nav-icon">📊</span> Precios
+                </a>
+                <a href="#reportar" class="nav-link" data-panel="reportar">
+                    <span class="nav-icon">📝</span> Reportar
+                </a>
+                <a href="#marketplace" class="nav-link" data-panel="marketplace">
+                    <span class="nav-icon">🤝</span> Market
+                </a>
+                <a href="#alertas" class="nav-link" data-panel="alertas">
+                    <span class="nav-icon">🔔</span> Alertas <span id="alertasBadge" class="badge-notif" style="display:none;">0</span>
+                </a>
+                <a href="#ranking" class="nav-link" data-panel="ranking">
+                    <span class="nav-icon">🏆</span> Top
+                </a>
+            </nav>
+
+            <div class="header-right">
+                <button id="themeToggle" class="btn-icon" title="Cambiar tema" aria-label="Cambiar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+
+                <div id="userArea">
+                    <button id="btnLogin" class="btn btn-sm btn-primary" onclick="abrirModalAuth()">
+                        <span>👤</span> <span class="login-text">Ingresar</span>
+                    </button>
+                    <div id="userMenu" class="user-menu" style="display:none;">
+                        <button id="userDropdown" class="btn btn-sm btn-ghost user-dropdown-btn" onclick="toggleUserDropdown()">
+                            <span class="user-avatar">👤</span>
+                            <span id="userNameDisplay" class="user-name-display"></span>
+                            <span class="dropdown-arrow">▾</span>
+                        </button>
+                        <div id="userDropdownMenu" class="user-dropdown-menu" style="display:none;">
+                            <a href="#micuenta" class="dropdown-item" data-panel="micuenta" onclick="navegarACuenta()">
+                                <span>📋</span> Mi Cuenta
+                            </a>
+                            <a href="#mispublicaciones" class="dropdown-item" data-panel="marketplace" onclick="navegarAMarketplace()">
+                                <span>📦</span> Mis Publicaciones
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-item logout-item" onclick="cerrarSesion()">
+                                <span>🚪</span> Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="hamburger" id="hamburgerBtn" aria-label="Menú" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ZONA PUBLICITARIA: HERO BANNER -->
+    <div class="ad-container ad-hero" id="ad-hero">
+        <div class="ad-label">Publicidad</div>
+        <a id="ad-hero-link" href="#" target="_blank" rel="noopener noreferrer nofollow">
+            <img id="ad-hero-img" src="" alt="Anuncio" style="max-width:100%; display:none;">
+        </a>
+        <div class="ad-placeholder" id="ad-hero-placeholder" data-ad="hero">
+            <p>📢 ¿Fabricas molinos o maquinaria para reciclaje?</p>
+            <p>Anúnciate aquí · Contacto: ventas@preciomolido.mx</p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="container main-content">
+
+        <!-- ===== PANEL: DASHBOARD ===== -->
+        <section id="panel-dashboard" class="panel active">
+            <div class="panel-header">
+                <h1>Precio del Plástico Molido en México</h1>
+                <p class="subtitle">Promedio ponderado de los últimos 30 días, basado en reportes de acopiadores verificados.</p>
+            </div>
+
+            <div class="market-trust-banner" id="marketTrustBanner" style="display:none;">
+                <div class="trust-content">
+                    <span class="trust-icon">🛡️</span>
+                    <div>
+                        <strong>Confianza del Mercado:</strong>
+                        <span id="trustLevel">Alta</span>
+                        <p style="font-size:0.8rem; margin-top:4px;">Basado en la calidad de reportes y transacciones verificadas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-toggle">
+                <button class="btn btn-sm btn-primary active" data-view="cards" id="viewCards">🗂 Tarjetas</button>
+                <button class="btn btn-sm btn-ghost" data-view="table" id="viewTable">📋 Tabla</button>
+            </div>
+
+            <div class="filters-bar">
+                <div class="filter-group">
+                    <label for="filterMaterial">Material</label>
+                    <select id="filterMaterial">
+                        <option value="todos">Todos los materiales</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterEstado">Estado</label>
+                    <select id="filterEstado">
+                        <option value="todos">Todos los estados</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterOperacion">Operación</label>
+                    <select id="filterOperacion">
+                        <option value="todos">Compra y Venta</option>
+                        <option value="Compra">Solo Compra</option>
+                        <option value="Venta">Solo Venta</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterCalidad">Calidad de datos</label>
+                    <select id="filterCalidad">
+                        <option value="todos">Todos los reportes</option>
+                        <option value="verificados">Solo verificados</option>
+                    </select>
+                </div>
+                <button id="btnApplyFilters" class="btn btn-primary">Filtrar</button>
+            </div>
+
+            <div class="filters-bar" style="margin-top:0; padding-top:0; border-top:none;">
+                <div class="filter-group filter-search">
+                    <label>🔍 Buscar</label>
+                    <input type="text" id="searchDashboard" placeholder="Buscar material, color, estado...">
+                </div>
+                <div class="filter-group">
+                    <label>📋 Ordenar</label>
+                    <select id="sortDashboard" class="sort-select">
+                        <option value="">Por defecto</option>
+                        <option value="precio-asc">Precio: menor a mayor</option>
+                        <option value="precio-desc">Precio: mayor a menor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="priceCards" class="price-cards-grid"></div>
+            <div id="priceTable" class="price-table-container" style="display:none;">
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>Material</th><th>Pres.</th><th>Origen</th><th>Color</th>
+                            <th>Estado</th><th>Op.</th><th>Precio</th>
+                            <th>Rango</th><th>Rep.</th><th>Cal.</th><th>Acc.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="priceTableBody"></tbody>
+                </table>
+            </div>
+            <div id="dashboardPagination" class="pagination-container" style="text-align:center; margin:20px 0;">
+                <button id="btnLoadMoreDashboard" class="btn btn-primary" style="display:none;">Cargar más precios</button>
+            </div>
+            <p id="transparencyNote" class="transparency-note"></p>
+            <div class="ad-container ad-inline" id="ad-inline">
+                <div class="ad-label">Publicidad</div>
+                <a id="ad-inline-link" href="#" target="_blank" rel="noopener noreferrer nofollow">
+                    <img id="ad-inline-img" src="" alt="Anuncio" style="max-width:100%; display:none;">
+                </a>
+                <div class="ad-placeholder" id="ad-inline-placeholder" data-ad="inline">
+                    <p>📢 ¿Vendes big bags, básculas o refacciones?</p>
+                    <p>Este espacio es para ti · ventas@preciomolido.mx</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PANEL: FORMULARIO DE REPORTE ===== -->
+        <section id="panel-reportar" class="panel">
+            <div class="panel-header">
+                <h2>Reportar Precio</h2>
+                <p class="subtitle">Comparte tu dato y desbloquea el promedio de tu zona al instante.</p>
+            </div>
+            <div id="reportAccessMessage" class="access-message"></div>
+            <form id="formReporte" class="report-form" style="display:none;">
+                <div class="form-group">
+                    <label for="material">Material <span class="required">*</span></label>
+                    <select id="material" required>
+                        <option value="">Selecciona un material</option>
+                    </select>
+                    <button type="button" class="btn btn-xs btn-ghost" onclick="abrirModalSugerirMaterial()" style="margin-top:4px;">+ Sugerir nuevo material</button>
+                </div>
+                <div class="form-group">
+                    <label for="presentacion">Presentación <span class="required">*</span></label>
+                    <select id="presentacion" required>
+                        <option value="">Selecciona presentación</option>
+                        <option value="Molido">Molido</option>
+                        <option value="Hojuela">Hojuela</option>
+                        <option value="Peletizado">Peletizado</option>
+                        <option value="Paca">Paca</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="origen">Origen <span class="required">*</span></label>
+                    <select id="origen" required>
+                        <option value="">Selecciona origen</option>
+                        <option value="Post-Industrial">Post-Industrial</option>
+                        <option value="Post-Consumo">Post-Consumo</option>
+                        <option value="Virgen Off-Spec">Virgen Off-Spec</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="color">Color</label>
+                    <input type="text" id="color" placeholder="Ej: Blanco Natural, Blanco Roto, Mixto...">
+                </div>
+                <div class="form-group">
+                    <label for="precioKg">Precio por Kilo (MXN) <span class="required">*</span></label>
+                    <input type="number" id="precioKg" placeholder="Ej: 18.50" step="0.01" min="0" required>
+                    <div id="precioWarning" class="precio-warning" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="tipoOperacion">Tipo de Operación <span class="required">*</span></label>
+                    <select id="tipoOperacion" required>
+                        <option value="">Selecciona</option>
+                        <option value="Compra">Precio al que COMPRO (Acopio)</option>
+                        <option value="Venta">Precio al que VENDO (Ofrezco)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="estado">Estado <span class="required">*</span></label>
+                        <select id="estado" required>
+                            <option value="">Selecciona estado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="municipio">Municipio</label>
+                        <input type="text" id="municipio" placeholder="Ej: Guadalajara">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="volumenTon">Volumen Disponible (Toneladas)</label>
+                    <input type="number" id="volumenTon" placeholder="Ej: 5" step="0.1" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="contaminacion">Contaminación Estimada</label>
+                    <select id="contaminacion">
+                        <option value="">Selecciona</option>
+                        <option value="0%">0% (Impecable)</option>
+                        <option value="<1%"><1%</option>
+                        <option value="1-3%">1-3%</option>
+                        <option value=">3%">>3%</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">📊 Reportar Precio</button>
+            </form>
+            <div id="reportResult" class="report-result" style="display:none;"></div>
+            <div class="ad-container ad-report" id="ad-report" style="margin-top:32px;">
+                <div class="ad-label">Publicidad</div>
+                <a id="ad-report-link" href="#" target="_blank" rel="noopener noreferrer nofollow">
+                    <img id="ad-report-img" src="" alt="Anuncio" style="max-width:100%; display:none;">
+                </a>
+                <div class="ad-placeholder" id="ad-report-placeholder" data-ad="report">
+                    <p>🔬 ¿Laboratorio de pruebas de materiales?</p>
+                    <p>Ofrece tus servicios aquí · ventas@preciomolido.mx</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PANEL: MARKETPLACE ===== -->
+        <section id="panel-marketplace" class="panel">
+            <div class="panel-header">
+                <h2>Marketplace de Plástico Molido</h2>
+                <p class="subtitle">Publica ofertas de compra/venta o busca material disponible en tu zona.</p>
+            </div>
+            <div class="disclaimer-box">
+                <p><strong>⚠️ Aviso importante:</strong> PrecioMolido.mx <strong>NO</strong> se hace responsable de las transacciones realizadas entre usuarios.</p>
+                <ul>
+                    <li>✅ Verificar el material personalmente o mediante una muestra antes de pagar.</li>
+                    <li>✅ Utilizar métodos de pago seguros.</li>
+                    <li>✅ Revisar la calificación del vendedor antes de concretar.</li>
+                    <li>⚠️ Reporta intentos de estafa o incumplimiento.</li>
+                    <li>🛡️ Los precios atípicos son marcados para tu seguridad.</li>
+                </ul>
+            </div>
+            <div id="marketplaceAccess" class="access-message"></div>
+            <button id="btnPublicarMarketplace" class="btn btn-primary" style="display:none; margin-bottom:24px;" onclick="mostrarFormularioPublicacion()">➕ Nueva publicación</button>
+            <div class="marketplace-tabs" id="mkTabs" style="display:none;">
+                <button class="mk-tab active" data-mktab="todas">📋 Todas</button>
+                <button class="mk-tab" data-mktab="ventas">💰 Ventas</button>
+                <button class="mk-tab" data-mktab="compras">🛒 Compras</button>
+            </div>
+            <div id="mkTabMessage" style="display:none; text-align:center; margin-bottom:16px; color:var(--success); font-weight:600;"></div>
+            <form id="formMarketplace" class="report-form" style="display:none;">
+                <input type="hidden" id="mkEditId" value="">
+                <div class="form-group">
+                    <label>Tipo de operación <span class="required">*</span></label>
+                    <select id="mkTipo" required>
+                        <option value="Compra">Busco comprar</option>
+                        <option value="Venta">Tengo para vender</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mkMaterial">Material <span class="required">*</span></label>
+                    <select id="mkMaterial" required>
+                        <option value="">Selecciona material</option>
+                    </select>
+                    <button type="button" class="btn btn-xs btn-ghost" onclick="abrirModalSugerirMaterial()" style="margin-top:4px;">+ Sugerir nuevo material</button>
+                </div>
+                <div class="form-group">
+                    <label for="mkPresentacion">Presentación</label>
+                    <input type="text" id="mkPresentacion" placeholder="Ej: Molido, Hojuela...">
+                </div>
+                <div class="form-group">
+                    <label for="mkOrigen">Origen</label>
+                    <select id="mkOrigen">
+                        <option value="">Selecciona</option>
+                        <option value="Post-Industrial">Post-Industrial</option>
+                        <option value="Post-Consumo">Post-Consumo</option>
+                        <option value="Virgen Off-Spec">Virgen Off-Spec</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mkColor">Color</label>
+                    <input type="text" id="mkColor" placeholder="Ej: Blanco Natural">
+                </div>
+                <div class="form-group">
+                    <label for="mkPrecio">Precio (MXN/kg)</label>
+                    <input type="number" id="mkPrecio" step="0.01" min="0">
+                    <div id="mkPrecioWarning" class="precio-warning" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="mkVolumen">Volumen (Toneladas)</label>
+                    <input type="number" id="mkVolumen" step="0.1" min="0">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mkEstado">Estado <span class="required">*</span></label>
+                        <select id="mkEstado" required>
+                            <option value="">Selecciona</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mkMunicipio">Municipio</label>
+                        <input type="text" id="mkMunicipio">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="mkGarantia">¿Ofreces garantía?</label>
+                    <select id="mkGarantia">
+                        <option value="No">No</option>
+                        <option value="Sí">Sí</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="mkDescripcion">Descripción adicional</label>
+                    <textarea id="mkDescripcion" rows="3" placeholder="Ej: Material limpio, sin contaminación..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Foto del material (opcional)</label>
+                    <input type="file" id="mkFoto" accept="image/*">
+                    <img id="mkFotoPreview" src="#" alt="Previsualización" style="display:none; max-width:200px; margin-top:10px; border-radius:8px;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="btnSubmitMK">📢 Publicar</button>
+                <button type="button" class="btn btn-ghost btn-full" onclick="cancelarPublicacion()">Cancelar</button>
+            </form>
+            <div class="filters-bar" id="mkFilters" style="display:none;">
+                <div class="filter-group">
+                    <label>Material</label>
+                    <select id="mkFilterMaterial">
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select id="mkFilterEstado">
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="display:none;">
+                    <select id="mkFilterOperacion">
+                        <option value="todos">Compra y Venta</option>
+                        <option value="Compra">Compra</option>
+                        <option value="Venta">Venta</option>
+                    </select>
+                </div>
+                <button id="btnApplyMkFilters" class="btn btn-primary">Filtrar</button>
+            </div>
+            <div class="filters-bar" id="mkSearchSort" style="display:none; margin-top:0; padding-top:0; border-top:none;">
+                <div class="filter-group filter-search">
+                    <label>🔍 Buscar</label>
+                    <input type="text" id="searchMarketplace" placeholder="Buscar material, estado, descripción...">
+                </div>
+                <div class="filter-group">
+                    <label>📋 Ordenar</label>
+                    <select id="sortMarketplace" class="sort-select">
+                        <option value="fecha-desc">Más recientes</option>
+                        <option value="fecha-asc">Más antiguos</option>
+                        <option value="precio-asc">Precio: menor a mayor</option>
+                        <option value="precio-desc">Precio: mayor a menor</option>
+                    </select>
+                </div>
+            </div>
+            <div id="marketplaceList" class="marketplace-grid"></div>
+            <div id="marketplacePagination" class="pagination-container" style="text-align:center; margin:20px 0;">
+                <button id="btnLoadMoreMarketplace" class="btn btn-primary" style="display:none;">Cargar más publicaciones</button>
+            </div>
+        </section>
+
+        <!-- ===== PANEL: RANKING ===== -->
+        <section id="panel-ranking" class="panel">
+            <div class="panel-header">
+                <h2>🏆 Top Acopiadores</h2>
+                <p class="subtitle">Usuarios que más contribuyen a la comunidad con reportes verificados.</p>
+            </div>
+            <div id="rankingList" class="ranking-list"></div>
+            <p class="transparency-note">El ranking se basa en cantidad de reportes en los últimos 30 días.</p>
+        </section>
+
+        <!-- ===== PANEL: ALERTAS ===== -->
+        <section id="panel-alertas" class="panel">
+            <div class="panel-header">
+                <h2>🔔 Alertas de Precio</h2>
+                <p class="subtitle">Configura notificaciones cuando un material baje o suba de cierto precio en tu estado.</p>
+            </div>
+            <div id="alertasContent">
+                <div id="alertasAccessMessage" class="access-message"></div>
+                <form id="formAlerta" class="report-form" style="display:none;">
+                    <div class="form-group">
+                        <label for="alertaMaterial">Material</label>
+                        <select id="alertaMaterial" required>
+                            <option value="">Selecciona material</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="alertaEstado">Estado</label>
+                        <select id="alertaEstado" required>
+                            <option value="">Selecciona estado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="alertaPrecio">Precio objetivo (MXN/kg)</label>
+                        <input type="number" id="alertaPrecio" placeholder="Ej: 15.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="alertaCondicion">Condición</label>
+                        <select id="alertaCondicion" required>
+                            <option value="debajo">Cuando baje de este precio</option>
+                            <option value="arriba">Cuando suba de este precio</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">🔔 Crear Alerta</button>
+                </form>
+                <div id="alertasList" class="alertas-list"></div>
+            </div>
+        </section>
+
+        <!-- ===== PANEL: MI CUENTA ===== -->
+        <section id="panel-micuenta" class="panel">
+            <div class="panel-header">
+                <h2>👤 Mi Cuenta</h2>
+                <p class="subtitle">Tu perfil, actividad, calificaciones, publicaciones y ofertas.</p>
+            </div>
+            <div id="cuentaContent" class="cuenta-container"></div>
+        </section>
+
+        <!-- ===== MODALES ===== -->
+        <div id="modalHistorico" class="modal" style="display:none;">
+            <div class="modal-content modal-wide">
+                <span class="modal-close" id="closeHistorico">&times;</span>
+                <h2 id="historicoTitle">Histórico de Precios</h2>
+                <div class="chart-container"><canvas id="chartHistorico"></canvas></div>
+                <p class="transparency-note" style="margin-top:16px;">Datos reales basados en reportes históricos.</p>
+            </div>
+        </div>
+
+        <div id="modalNewsletter" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeNewsletter">&times;</span>
+                <h2>📧 Suscríbete al Resumen Semanal</h2>
+                <form id="formNewsletter">
+                    <div class="form-group">
+                        <label for="newsletterEmail">Email</label>
+                        <input type="email" id="newsletterEmail" placeholder="tu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newsletterEstado">Estado de interés</label>
+                        <select id="newsletterEstado" required>
+                            <option value="">Selecciona estado</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Suscribirme</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalContacto" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeContacto">&times;</span>
+                <h2>📬 Contactar al publicante</h2>
+                <div id="contactoDetalle"></div>
+                <button class="btn btn-primary btn-full" onclick="cerrarModalContacto()">Cerrar</button>
+            </div>
+        </div>
+
+        <div id="modalCalificar" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeCalificar">&times;</span>
+                <h2>⭐ Calificar vendedor</h2>
+                <form id="formCalificar">
+                    <input type="hidden" id="calificarEmail">
+                    <div class="form-group">
+                        <label>Calificación (1-5 estrellas)</label>
+                        <div class="star-rating">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                        </div>
+                        <input type="hidden" id="calificarPuntuacion" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Comentario (opcional)</label>
+                        <textarea id="calificarComentario" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Enviar calificación</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalReportar" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeReportar">&times;</span>
+                <h2>🚩 Reportar vendedor</h2>
+                <form id="formReportarVendedor">
+                    <input type="hidden" id="reportarEmail">
+                    <div class="form-group">
+                        <label>Motivo del reporte</label>
+                        <select id="reportarMotivo" required>
+                            <option value="">Selecciona un motivo</option>
+                            <option value="Material no entregado">Material no entregado</option>
+                            <option value="Material no coincide">Material no coincide</option>
+                            <option value="Estafa / fraude">Estafa / fraude</option>
+                            <option value="Incumplimiento de garantía">Incumplimiento de garantía</option>
+                            <option value="Precio sospechoso">Precio sospechoso</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción adicional</label>
+                        <textarea id="reportarDescripcion" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Enviar reporte</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalOferta" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeOferta">&times;</span>
+                <h2>💡 Hacer una oferta</h2>
+                <form id="formOferta">
+                    <input type="hidden" id="ofertaPublicacionId">
+                    <input type="hidden" id="ofertaCompradorEmail">
+                    <div class="form-group">
+                        <label>Precio que ofreces (MXN/kg) <span class="required">*</span></label>
+                        <input type="number" id="ofertaPrecio" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Volumen disponible (Toneladas)</label>
+                        <input type="number" id="ofertaVolumen" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Mensaje (opcional)</label>
+                        <textarea id="ofertaMensaje" rows="3" placeholder="Ej: Material limpio, puedo entregar esta semana..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">📨 Enviar oferta</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="modalAuth" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeModal">&times;</span>
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Iniciar Sesión</button>
+                    <button class="auth-tab" data-tab="registro">Registrarse</button>
+                </div>
+                <form id="formLogin" class="auth-form active">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+                </form>
+                <form id="formRegistro" class="auth-form" style="display:none;">
+                    <div class="form-group">
+                        <label>Nombre o Empresa</label>
+                        <input type="text" id="regNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña (mín. 6 caracteres)</label>
+                        <input type="password" id="regPassword" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Usuario</label>
+                        <select id="regTipo" required>
+                            <option value="">Selecciona</option>
+                            <option>Acopiador</option>
+                            <option>Transformador / Reciclador</option>
+                            <option>Distribuidor de Virgen Off-Spec</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado donde operas</label>
+                        <select id="regEstado" required>
+                            <option value="">Selecciona</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Crear cuenta</button>
+                </form>
+                <p class="form-note">Al acceder aceptas nuestros términos y política de privacidad.</p>
+            </div>
+        </div>
+
+        <div id="modalFoto" class="modal" style="display:none;">
+            <div class="modal-content modal-foto-content">
+                <span class="modal-close" id="closeFoto">&times;</span>
+                <img id="fotoAmpliada" src="" alt="Foto del material" class="foto-ampliada-img">
+            </div>
+        </div>
+
+        <!-- Modal Sugerir Material -->
+        <div id="modalSugerirMaterial" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close" id="closeSugerirMaterial">&times;</span>
+                <h2>🧪 Sugerir nuevo material</h2>
+                <p class="modal-subtitle">Propón un material que no esté en la lista. Será revisado antes de aparecer.</p>
+                <form id="formSugerirMaterial">
+                    <div class="form-group">
+                        <label>Material <span class="required">*</span></label>
+                        <input type="text" id="sugMaterial" placeholder="Ej: HDPE, PC, Nylon..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Presentación</label>
+                        <select id="sugPresentacion">
+                            <option value="">Selecciona</option>
+                            <option value="Molido">Molido</option>
+                            <option value="Hojuela">Hojuela</option>
+                            <option value="Peletizado">Peletizado</option>
+                            <option value="Paca">Paca</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Origen</label>
+                        <select id="sugOrigen">
+                            <option value="">Selecciona</option>
+                            <option value="Post-Industrial">Post-Industrial</option>
+                            <option value="Post-Consumo">Post-Consumo</option>
+                            <option value="Virgen Off-Spec">Virgen Off-Spec</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="text" id="sugColor" placeholder="Ej: Natural, Blanco Roto, Mixto...">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">📩 Enviar sugerencia</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== MODAL: ADMINISTRACIÓN DE ANUNCIOS Y MATERIALES ===== -->
+        <div id="modalAdmin" class="modal" style="display:none;">
+            <div class="modal-content modal-wide" style="max-width:900px;">
+                <span class="modal-close" id="closeAdmin">&times;</span>
+                <h2>🔧 Administración</h2>
+                <div id="adminContent">
+                    <div id="adminLogin">
+                        <p class="modal-subtitle">Ingresa la contraseña de administración</p>
+                        <form id="formAdminLogin">
+                            <div class="form-group">
+                                <label>Contraseña</label>
+                                <input type="password" id="adminPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">Acceder</button>
+                        </form>
+                    </div>
+                    <div id="adminPanel" style="display:none;">
+                        <div class="admin-tabs">
+                            <button class="admin-tab active" data-admintab="hero">Hero Banner</button>
+                            <button class="admin-tab" data-admintab="inline">Inline</button>
+                            <button class="admin-tab" data-admintab="report">Reporte</button>
+                            <button class="admin-tab" data-admintab="sidebar">Sidebar</button>
+                            <button class="admin-tab" data-admintab="footer">Footer</button>
+                            <button class="admin-tab" data-admintab="materiales">🧪 Materiales</button>
+                            <button class="admin-tab" data-admintab="reportesAdmin">📊 Reportes</button>
+                            <button class="admin-tab" data-admintab="marketplaceAdmin">🛒 Market</button>
+                            <button class="admin-tab" data-admintab="usuarios">👥 Usuarios</button>
+                        </div>
+                        <form id="formAdminAnuncios" class="admin-form">
+                            <input type="hidden" id="adminCurrentTab" value="hero">
+                            <div class="form-group">
+                                <label>Secciones donde se muestra (separadas por coma)</label>
+                                <input type="text" id="adminSecciones" placeholder="dashboard, reportar, marketplace...">
+                            </div>
+                            <div class="form-group">
+                                <label>URL de la imagen</label>
+                                <input type="text" id="adminImg" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>Enlace del anuncio</label>
+                                <input type="text" id="adminLink" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label>Texto alternativo</label>
+                                <input type="text" id="adminAlt" placeholder="Anuncio...">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-full">💾 Guardar cambios</button>
+                        </form>
+                        <div id="adminMateriales" style="display:none;">
+                            <h3 style="margin-bottom:16px;">Sugerencias de materiales pendientes</h3>
+                            <div id="listaSugerenciasMateriales"></div>
+                        </div>
+                        <div id="adminReportes" style="display:none;"></div>
+                        <div id="adminMarketplace" style="display:none;"></div>
+                        <div id="adminUsuarios" style="display:none;"></div>
+                        <button id="btnCerrarAdmin" class="btn btn-ghost btn-full" style="margin-top:10px;">Cerrar administración</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SIDEBAR PUBLICITARIO -->
+    <aside class="ad-sidebar" id="ad-sidebar">
+        <div class="ad-label">Publicidad</div>
+        <a id="ad-sidebar-link" href="#" target="_blank" rel="noopener noreferrer nofollow">
+            <img id="ad-sidebar-img" src="" alt="Anuncio" style="max-width:100%; display:none;">
+        </a>
+        <div class="ad-placeholder ad-placeholder-sidebar" id="ad-sidebar-placeholder" data-ad="sidebar">
+            <p>🏭 ¿Distribuyes maquinaria para reciclaje?</p>
+            <p>Anúnciate aquí</p>
+            <p style="font-size:0.8rem;">ventas@preciomolido.mx</p>
+        </div>
+    </aside>
+
+    <!-- FOOTER BANNER -->
+    <div class="ad-container ad-footer" id="ad-footer">
+        <div class="ad-label">Publicidad</div>
+        <a id="ad-footer-link" href="#" target="_blank" rel="noopener noreferrer nofollow">
+            <img id="ad-footer-img" src="" alt="Anuncio" style="max-width:100%; display:none;">
+        </a>
+        <div class="ad-placeholder" id="ad-footer-placeholder" data-ad="footer">
+            <p>📢 ¿Organizas una feria o evento del sector plástico?</p>
+            <p>Promociónalo aquí · ventas@preciomolido.mx</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>PrecioMolido.mx</h4>
+                    <p>Referencia de precios de plástico molido en México.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Secciones</h4>
+                    <a href="#dashboard">Precios</a>
+                    <a href="#reportar">Reportar</a>
+                    <a href="#marketplace">Marketplace</a>
+                    <a href="#alertas">Alertas</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Contacto</h4>
+                    <a href="mailto:ventas@preciomolido.mx">ventas@preciomolido.mx</a>
+                    <a href="#" onclick="abrirNewsletter()">Newsletter Semanal</a>
+                </div>
+            </div>
+            <p class="footer-disclaimer">
+                Los precios mostrados son reportes de usuarios y tienen solo fines informativos. No constituyen una cotización vinculante. 
+                <span style="cursor:pointer; color:var(--primary);" onclick="abrirAdmin()">© 2024 PrecioMolido.mx</span>
+            </p>
+        </div>
+    </footer>
+
+    <!-- WHATSAPP FLOTANTE -->
+    <a href="https://wa.me/5210000000000?text=Hola,%20vi%20PrecioMolido.mx%20y%20quiero%20información" 
+       class="whatsapp-float" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       aria-label="Contactar por WhatsApp">
+        💬
+    </a>
+
+    <!-- CONTENEDOR DE TOASTS -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Socket.io -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="javascript.js"></script>
+</body>
+</html>
