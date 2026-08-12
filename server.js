@@ -299,9 +299,7 @@ app.delete('/api/marketplace/:id', verificarToken, (req, res) => {
 app.post('/api/upload', verificarToken, async (req, res) => {
     try {
         const fileStr = req.body.image;
-        const uploadResponse = await cloudinary.uploader.upload(fileStr, {
-            upload_preset: 'preciomolido_preset'
-        });
+        const uploadResponse = await cloudinary.uploader.upload(fileStr);
         res.json({ url: uploadResponse.secure_url });
     } catch (error) {
         console.error(error);
